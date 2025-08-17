@@ -31,35 +31,51 @@ void delay(uint32_t t)
 
 int main(void)
 {
-	/* 1. Enable clock for port
-	 * 2. Mode
-	 * 3. Output type
-	 * 4. Output speed
-	 * 5. set or clear pin
+	volatile uint32_t lock_status;
+
+	/* LOCK key write sequence:
+	 * 1. WR LCKR[16] = ‘1’ + LCKR[15:0]
+	 * 2. WR LCKR[16] = ‘0’ + LCKR[15:0]
+	 * 3. WR LCKR[16] = ‘1’ + LCKR[15:0]
+	 * 4. RD LCKR
+	 * 5. RD LCKR[16] = ‘1’
 	 * */
 
 	// Enable clock for port D
 	RCC->AHB1ENR |= 1 << 3;
 
-	// Mode: Set PD12, PD13, PD14 and PD15 as output
-	GPIOD->MODER &= ~((3U << 24)| (3U << 26) | (3U << 28) | (3U << 30));
-	GPIOD->MODER |= (1U << 24)| (1U << 26) | (1U << 28) | (1U << 30);
+	// Mode: Set PD12 as output
+	GPIOD->MODER &= ~(3U << 24);
+	GPIOD->MODER |= (1U << 24);
 
 	// Output type: push-pull
-	GPIOD->OTYPER &= ~(0b1111 << 12);
+	GPIOD->OTYPER &= ~(1U << 12);
 
 	// Speed: medium
-	GPIOD->OSPEEDR &= ~(0b11111111 << 24);
-	GPIOD->OSPEEDR |= (0b01010101 << 24);
+	GPIOD->OSPEEDR &= ~(3U << 24);
+	GPIOD->OSPEEDR |= (1U << 24);
+
+	// 1. WR LCKR[16] = ‘1’ + LCKR[15:0]
+	GPIOD->LCKR = (1 << 16) | (1 << 12);
+
+	// 2. WR LCKR[16] = ‘0’ + LCKR[15:0]
+	GPIOD->LCKR = (1 << 12);
+
+	// 3. WR LCKR[16] = ‘1’ + LCKR[15:0]
+	GPIOD->LCKR = (1 << 16)| (1 << 12);
+
+	// 4. RD LCKR
+	lock_status = GPIOD->LCKR;
+
+	// 5. RD LCKR[16] = ‘1’
+	lock_status = (GPIOD->LCKR & 0x010000) >> 16;
 
 	while(1)
 	{
-		// Set 4 GPIOs to high
-		GPIOD->BSRR |= (0b1111) << 12;
+		GPIOD->BSRR |= (1 << 12);
 		delay(100);
 
-		// Set 4 GPIOs to low
-		GPIOD->BSRR |= (0b1111) << 28;
+		GPIOD->BSRR |= (1 << 28);
 		delay(100);
 	}
 }

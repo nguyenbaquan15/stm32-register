@@ -18,6 +18,8 @@
 
 #include <stm32f407xx.h>
 
+#define read_button	((GPIOA->IDR & 0x01) >> 0)
+
 void delay(uint32_t t)
 {
 	for(int i=0;i<t;i++)
@@ -33,33 +35,40 @@ int main(void)
 {
 	/* 1. Enable clock for port
 	 * 2. Mode
-	 * 3. Output type
-	 * 4. Output speed
-	 * 5. set or clear pin
+	 * 3. pull up or pull down resistor
+	 *
 	 * */
 
-	// Enable clock for port D
-	RCC->AHB1ENR |= 1 << 3;
+	// Enable clock for port A and port D
+	RCC->AHB1ENR |= (1 << 0) | (1 << 3);
 
-	// Mode: Set PD12, PD13, PD14 and PD15 as output
-	GPIOD->MODER &= ~((3U << 24)| (3U << 26) | (3U << 28) | (3U << 30));
-	GPIOD->MODER |= (1U << 24)| (1U << 26) | (1U << 28) | (1U << 30);
+	// Mode: Set PA0 as Input
+	GPIOA->MODER &= ~(3U << 0);
+
+	// No pull-up, pull-down(exist a resistor on board)
+	GPIOA->PUPDR &= ~(3u<<0);
+
+	// Mode: Set PD12 as output
+	GPIOD->MODER &= ~(3U << 24);
+	GPIOD->MODER |= (1U << 24);
 
 	// Output type: push-pull
-	GPIOD->OTYPER &= ~(0b1111 << 12);
+	GPIOD->OTYPER &= ~(1 << 12);
 
 	// Speed: medium
-	GPIOD->OSPEEDR &= ~(0b11111111 << 24);
-	GPIOD->OSPEEDR |= (0b01010101 << 24);
+	GPIOD->OSPEEDR &= ~(3 << 24);
+	GPIOD->OSPEEDR |= (1 << 24);
 
 	while(1)
 	{
-		// Set 4 GPIOs to high
-		GPIOD->BSRR |= (0b1111) << 12;
-		delay(100);
-
-		// Set 4 GPIOs to low
-		GPIOD->BSRR |= (0b1111) << 28;
-		delay(100);
+		if(read_button == 1)
+		{
+			delay(30);
+			if(read_button == 1)
+			{
+				GPIOD->ODR ^= (1 << 12);
+				while(read_button == 1);
+			}
+		}
 	}
 }
