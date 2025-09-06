@@ -39,11 +39,11 @@ int main(void)
 	 * */
 
 	// Enable clock for port D
-	RCC->AHB1ENR |= 1 << 3;
+	RCC->AHB1ENR |= 1 << RCC_AHB1ENR_GPIODEN_Pos;
 
 	// Mode: Set PD12, PD13, PD14 and PD15 as output
-	GPIOD->MODER &= ~((3U << 24)| (3U << 26) | (3U << 28) | (3U << 30));
-	GPIOD->MODER |= (1U << 24)| (1U << 26) | (1U << 28) | (1U << 30);
+	GPIOD->MODER &= ~((3U << GPIO_MODER_MODER12_Pos)| (3U << GPIO_MODER_MODER13_Pos) | (3U << GPIO_MODER_MODER14_Pos) | (3U << GPIO_MODER_MODER15_Pos));
+	GPIOD->MODER |= (1U << GPIO_MODER_MODER12_Pos)| (1U << GPIO_MODER_MODER13_Pos) | (1U << GPIO_MODER_MODER14_Pos) | (1U << GPIO_MODER_MODER15_Pos);
 
 	// Output type: push-pull
 	GPIOD->OTYPER &= ~(0b1111 << 12);
