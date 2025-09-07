@@ -20,6 +20,8 @@
 
 volatile uint32_t count = 0;
 
+void EXTI0_IRQHandler_Custom(void);
+
 void delay(uint32_t t)
 {
 	for(int i=0;i<t;i++)
@@ -77,10 +79,39 @@ void EXTI_Init(void)
 	__NVIC_EnableIRQ(EXTI0_IRQn);
 }
 
+void move_vector_table(void)
+{
+	/* Modify linker file to vector table won't overwrite to variable
+	 * VTTBL    (xrw)    : ORIGIN = 0x20000000,   LENGTH = 1K
+	 * Copy vector table to RAM
+	 * Change offset for vector table in cortex ARM
+	 * Modify interrupt handler in vector table
+	 * */
+
+	uint8_t *pFLASH = 0;
+	uint8_t *pRAM = (uint8_t *)0x20000000;
+	uint32_t *PVTOR = (uint32_t *)0x20000000;
+
+	// Copy vector table to RAM
+	for(uint32_t i = 0 ; i< 0x184;i++)
+	{
+		pRAM[i] = pFLASH[i];
+	}
+
+	// Change offset for vector table in cortex ARM
+	SCB->VTOR = 0x20000000;
+
+	// Modify interrupt handler in vector table
+	*(PVTOR + 22) = (uint32_t)EXTI0_IRQHandler_Custom | 1;
+
+}
+
 int main(void)
 {
 	GPIO_Init();
 	EXTI_Init();
+
+	move_vector_table();
 
 	while(1)
 	{
@@ -93,7 +124,7 @@ int main(void)
 	}
 }
 
-void EXTI0_IRQHandler(void)
+void EXTI0_IRQHandler_Custom(void)
 {
 	// Clear Pending bit
 	EXTI->PR |= 1 << EXTI_PR_PR0_Pos;
