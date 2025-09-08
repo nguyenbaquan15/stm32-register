@@ -149,7 +149,7 @@ g_pfnVectors:
   .word	RTC_WKUP_IRQHandler          			/* RTC Wakeup interrupt through the EXTI line                         */
   .word	0                            			/* Reserved                                                           */
   .word	RCC_IRQHandler               			/* RCC global interrupt                                               */
-  .word	EXTI0_IRQHandler             			/* EXTI Line0 interrupt                                               */
+  .word	EXTI0_IRQHandler_Custom             	/* EXTI Line0 interrupt                                               */
   .word	EXTI1_IRQHandler             			/* EXTI Line1 interrupt                                               */
   .word	EXTI2_IRQHandler             			/* EXTI Line2 interrupt                                               */
   .word	EXTI3_IRQHandler             			/* EXTI Line3 interrupt                                               */
@@ -284,8 +284,8 @@ g_pfnVectors:
 	.weak	RCC_IRQHandler
 	.thumb_set RCC_IRQHandler,Default_Handler
 
-	.weak	EXTI0_IRQHandler
-	.thumb_set EXTI0_IRQHandler,Default_Handler
+	.weak	EXTI0_IRQHandler_Custom
+	.thumb_set EXTI0_IRQHandler_Custom,Default_Handler
 
 	.weak	EXTI1_IRQHandler
 	.thumb_set EXTI1_IRQHandler,Default_Handler

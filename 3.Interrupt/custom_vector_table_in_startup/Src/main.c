@@ -93,7 +93,7 @@ int main(void)
 	}
 }
 
-void EXTI0_IRQHandler(void)
+void EXTI0_IRQHandler_Custom(void)
 {
 	// Clear Pending bit
 	EXTI->PR |= 1 << EXTI_PR_PR0_Pos;
