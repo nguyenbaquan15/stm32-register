@@ -18,8 +18,6 @@
 
 #include <stm32f407xx.h>
 
-volatile uint32_t count = 0;
-
 void delay(uint32_t t)
 {
 	for(int i=0;i<t;i++)
@@ -54,53 +52,51 @@ void GPIO_Init(void)
 	GPIOD->OSPEEDR |= (1 << 24);
 }
 
-void EXTI_Init(void)
+void HSE_Clock_Init(void)
 {
-	/*
-	 * Enable clock for SYSCFG
-	 * SYSCFG external interrupt configuration
-	 * Configure the mask bits of the 23 interrupt lines (EXTI_IMR)
-	 * Configure the Trigger selection bits of the interrupt lines (EXTI_RTSR and EXTI_FTSR)
-	 * Configure the enable and mask bits that control the NVIC IRQ channel
-	 *
-	 * */
 
-	// Enable clock for SYSCFG peripheral
-	RCC->APB2ENR |= (1<< RCC_APB2ENR_SYSCFGEN_Pos);
+}
 
-	// Select source for line 0 as PA port
-	SYSCFG->EXTICR[0] &= ~ SYSCFG_EXTICR1_EXTI0_Msk;
+void LSE_Clock_Init(void)
+{
 
-	// Set interrupt mask for line 0(PA0)
-	EXTI->IMR |= 1 << EXTI_IMR_MR0_Pos;
+}
 
-	// Falling edge interrupt
-	EXTI->FTSR |= 1 << EXTI_FTSR_TR0_Pos;
+void LSI_Clock_Init(void)
+{
 
-	// NVIC
-	__NVIC_EnableIRQ(EXTI0_IRQn);
+}
+
+void PLL_HSE_Clock_Init(void)
+{
+
+}
+
+void PLL_HSI_Clock_Init(void)
+{
+
+}
+
+void Clock_Out_Init(void)
+{
+
 }
 
 int main(void)
 {
 	GPIO_Init();
-	EXTI_Init();
+
+	//HSE_Clock_Init();
+	//LSE_Clock_Init();
+	//LSI_Clock_Init();
+	//HSE_Clock_Init();
+	//PLL_HSE_Clock_Init();
+	//PLL_HSI_Clock_Init();
+
+	Clock_Out_Init();
 
 	while(1)
 	{
-		if(count == 1)
-		{
-			delay(30);
-			GPIOD->ODR ^= (1 << 12);
-			count = 0;
-		}
+
 	}
-}
-
-void EXTI0_IRQHandler(void)
-{
-	// Clear Pending bit
-	EXTI->PR |= 1 << EXTI_PR_PR0_Pos;
-
-	count = 1;
 }

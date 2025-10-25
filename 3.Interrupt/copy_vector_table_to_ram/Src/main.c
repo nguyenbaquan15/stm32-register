@@ -59,12 +59,16 @@ void GPIO_Init(void)
 void EXTI_Init(void)
 {
 	/*
+	 * Enable clock for SYSCFG
 	 * SYSCFG external interrupt configuration
 	 * Configure the mask bits of the 23 interrupt lines (EXTI_IMR)
 	 * Configure the Trigger selection bits of the interrupt lines (EXTI_RTSR and EXTI_FTSR)
 	 * Configure the enable and mask bits that control the NVIC IRQ channel
 	 *
 	 * */
+
+	// Enable clock for SYSCFG peripheral
+	RCC->APB2ENR |= (1<< RCC_APB2ENR_SYSCFGEN_Pos);
 
 	// Select source for line 0 as PA port
 	SYSCFG->EXTICR[0] &= ~ SYSCFG_EXTICR1_EXTI0_Msk;
